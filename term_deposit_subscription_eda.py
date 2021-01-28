@@ -44,3 +44,28 @@ def groupby_method(groupby_features,method):
             return series_groupby.sum()
         elif method == 'mean':
             return series_groupby.mean()
+
+#Created distinct function for the kind of plotting to insert another plotting kind function into groupby_graph function if needed. 
+def groupby_bar(groupby_df,bar_feature='balance'):
+    plt.figure(figsize = (15,5))
+    plt.bar(groupby_df.index.values,groupby_df[bar_feature],label = bar_feature)
+    plt.legend(prop={'size': 20})
+    plt.ylabel('$',rotation = 0)
+    plt.xlabel(groupby_df.index.name)
+    plt.show()
+
+def groupby_list(categorical_features,numerical_features):
+    groupby_lists = []
+    for groupby_name in categorical_features:
+        groupby_list = numerical_features[:]
+        groupby_list.append(groupby_name)
+        groupby_lists.append(groupby_list)
+
+    return groupby_lists 
+
+
+if __name__ == '__main__':
+    
+    groupby_lists = groupby_list(categorical_features,numerical_features)
+    for feature_list in groupby_lists:
+           groupby_bar(groupby_method(feature_list,'mean'))
