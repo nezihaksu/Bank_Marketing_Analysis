@@ -47,3 +47,50 @@ numerical_x_train,y_train,numerical_x_validation,y_validation =  data_splitter(n
 
 gnb = GaussianNB()
 cnb = CategoricalNB()
+
+class ClfSwitcher(BaseEstimator):
+
+	def __init__(self, estimator = LogisticRegression()):
+	    """
+	    A Custom BaseEstimator that can switch between classifiers.
+	    :param estimator: sklearn object - The classifier
+	    """ 
+	    self.estimator = estimator
+	
+	def fit(self, X, y=None, **kwargs):
+	    self.estimator.fit(X, y)
+	    return self
+	
+	def predict(self, X, y=None):
+	    return self.estimator.predict(X)
+	
+	def predict_proba(self, X):
+	    return self.estimator.predict_proba(X)
+	
+	def score(self, X, y):
+	    return self.estimator.score(X, y)
+
+gnb_parameters = {
+	'clf__estimator':[gnb],
+	'clf__estimator__var_smoothing':[1*10**(-9),1*10**(-10)]
+}
+
+cnb_parameters = {
+	'clf__estimator':[cnb],
+	'clf__estimator__alpha':[1.0,0.9,1.1],
+	'clf__estimator__fit_prior':[True,False]
+}
+
+pipeline = Pipeline([
+    ('clf', ClfSwitcher()),
+])
+
+
+#Function to get probability results of categorical and numerical data and multiply them to get the final outcome.
+def bayesian_model(clf_parameters,x_train,y_train,x_validation):
+
+	grid_search = GridSearchCV(pipeline,clf_parameters,n_jobs=-1, verbose=1,cv = 5)	
+	grid_search.fit(x_train,y_train)
+	prob = grid_search.predict_proba(x_validation)
+
+	return prob
