@@ -94,7 +94,7 @@ def bayesian_model(clf_parameters,x_train,y_train,x_validation):
 	prob = grid_search.predict_proba(x_validation)
 
 	return prob
-	
+
 categorical_bayesian_prob = bayesian_model(cnb_parameters,categorical_x_train,y_train,categorical_x_validation)
 numerical_bayesian_prob = bayesian_model(gnb_parameters,numerical_x_train,y_train,numerical_x_validation)
 bayesian_score = categorical_bayesian_prob*numerical_bayesian_prob
@@ -107,13 +107,13 @@ logreg = LogisticRegression()
 lgbm = LGBMClassifier()
 
 log_parameters = {
-	'clf__estimator':[logreg]
+	'clf__estimator':[logreg],
     'clf__estimator__penalty': ['l1','l2'],
     'clf__estimator__max_iter': [4000],
     'clf__estimator__solver':['saga']
    }
 lgbm_parameters = {
-	'clf__estimator':[lgbm]
+	'clf__estimator':[lgbm],
     'clf__estimator__boosting_type' : ['gbdt','dart'],
     'clf__estimator__num_leaves': ['31','20'],
     'clf__estimator__learning_rate': [0.1,0.01],
