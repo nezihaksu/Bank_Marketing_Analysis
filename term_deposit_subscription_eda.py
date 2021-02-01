@@ -6,7 +6,7 @@ sns.set()
 import re
 
 #Splittin dataset into columns.
-df = pd.read_csv(r'C:\Users\nezih\Desktop\bankdata\bank-full.csv',sep = "?")
+df = pd.read_csv(r'C:\Users\nezih\Desktop\data\bank\bank-full.csv',sep = "?")
 quotes_strip = list(df.columns)[0].replace('"','')
 columns_split = quotes_strip.split(';')
 df = df[df.iloc[:,0].name].str.split(pat = ';',expand = True)
@@ -25,9 +25,9 @@ def convert_categorical(df):
             df[column] = pd.Categorical(df[column])
             categorical_features.append(df[column].name)
         
-    return list(set(categorical_features)),df
+    return list(set(categorical_features))
 
-categorical_features,df = convert_categorical(df)
+categorical_features = convert_categorical(df)
 numerical_features = [name for name in feature_list if name not in categorical_features]
 
 numerical_df = df[numerical_features]
