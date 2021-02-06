@@ -25,7 +25,7 @@ def convert_categorical(df):
             df[column] = pd.Categorical(df[column])
             categorical_features.append(df[column].name)
         
-    return list(set(categorical_features))
+    return list(set(categorical_features)),df
 
 categorical_features = convert_categorical(df)
 numerical_features = [name for name in feature_list if name not in categorical_features]
