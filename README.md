@@ -6,5 +6,33 @@ The classification goal is to predict if the client will subscribe (yes/no) a te
 
 ## Explanatory Data Analysis
 
-Firstly,to see the graphs where Balance is grouped by categories in categorical features explains the financial status of people in those respective categories.
+### Balance
+
+I wrote a function that takes arguments to group by the dataframe by a numerical feature and the kind of it (sum or mean).
+Firstly,to see the graphs where categorical features is grouped by Balance.Categorical features shows the mean balance of people in those respective categories.
+It shows how much balance does most of the people in each category have.
+According to subscription and balance graph,people who did not subscribed has more balance than who did.
+Management type of jobs also have the most of balance amount whereas unkown category has the least amount.
+Balance difference between secondary and tertiary education is so small.
+People who have house loan have more balance.
+
+![](/graph_images/balance1.JPG)
+![](/graph_images/balance2.JPG)
+
+
+### Duration
+
+I used the same function to see the time spent on phone to make people subscribe the term deposit.
+Sum of durations of phone calls for each category.
+Longest phone calls happened with blue collar,married people.
+Also people who use cellphone talked more.
+Lots of time also spent on people who we don't know whether or not subscribed.
+More time on the phone spent on people who did not accept to subscribe than the ones who subscribed.Which goes to show lots of time spent on persuasion.
+
+![](/graph_images/sum_of_duration1.JPG)
+![](/graph_images/sum_of_duration2.JPG)
+
+
+
+
 
