@@ -4,7 +4,7 @@ The data is related with direct marketing campaigns of a Portuguese banking inst
 
 The classification goal is to predict if the client will subscribe (yes/no) a term deposit (variable y).
 
-## Explanatory Data Analysis
+## Exploratory Data Analysis
 
 ### Balance
 
