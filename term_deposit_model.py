@@ -15,31 +15,31 @@ SEED = 42
 
 pre_df = pd.read_csv("C:\Users\nezih\Desktop\data\bank\cleaned_bank_dataset.csv")
 print(pre_df)
+
 #Data types.
 print(pre_df.dtypes)
 
-def convert_categorical(df):
-    feature_list = df.columns
-    categorical_features = []
-    letter_pattern = re.compile(r'[A-z]')
-    #If values types are all str or int,it is impossible to distinguish them with this method,so i prefer to do it with regex.
-    for column in feature_list:
-
-        if letter_pattern.match(str(df[column].values[0])):
-            df[column] = pd.Categorical(df[column])
-            categorical_features.append(df[column].name)
-        
-    return list(set(categorical_features))
-
-print(convert_categorical(pre_df))
-print(pre_df.dtypes)
-
-categorical_features = pre_df.dtypes[pre_df.dtypes == "category"].index
-numeric_features = [feature for feature in pre_df.columns if feature not in categorical_features]
+#Duration effects target variable pretty heavily,because if duration = 0,then there is no call made,therefore y=0,no subscription has been made.
+#Due to that duration is not appropriate for a real life model.
+#Treating education as a non-ordinal categorical features yields better prediction power.Meaning,there is not relation between education levels.
+categorical_features = ['job', 'marital', 'education','day','age','default', 'housing', 'loan', 'contact','month', 'poutcome']
+numeric_features = ['balance','campaign','pdays', 'previous']
 print("Numeric Features:\n")
-print(numeric_features)
+print(len(numeric_features))
 print("Categorical features:\n")
-categorical_features
+len(categorical_features)
+
+
+#FEATURE ENGINEERING
+
+#Converting age into categorical data by putting values for certain age ranges.
+#This will make model to treat people according to age range(young,mature,old) as we society does in real life.
+print(pre_df.age.describe())
+
+pre_df.age[(pre_df.age > 18) & (pre_df.age <=25)] = 1
+pre_df.age[(pre_df.age > 25) & (pre_df.age <=65)] = 2
+pre_df.age[(pre_df.age > 65) & (pre_df.age <=95)] = 3
+print(pre_df.age)
 
 le = LabelEncoder()
 #LabelEncoder,because education is an ordinal categorical variable.
@@ -49,9 +49,9 @@ print(pre_df.education)
 pre_df.y = le.fit_transform(pre_df.y)
 print(pre_df.y)
 
-non_ordinal_categoricals = [feature for feature in categorical_features if feature not in ['education',"y"]]
-dummy_df = pd.get_dummies(pre_df[non_ordinal_categoricals],prefix_sep = '_',drop_first = True)
-print("Dataset after getting dummies.")
+#Due to all categorical features are being non-ordinal OneHotEncoding is applied by using get_dummies.
+dummy_df = pd.get_dummies(pre_df[categorical_features],prefix_sep = '_',drop_first = True,columns = categorical_features)
+print("OneHotEncoded nominal categorical features.")
 print(dummy_df)
 
 #Numeric feature number is 7,dummy_df column size is 32 plus education and y variable makes 41 columns.
@@ -88,11 +88,12 @@ print("Positive prediction score")
 print(imbalance_test(x_train,x_test,y_train,y_test,1))
 #This goes to show how imbalance effects predictions.
 
-#Balancing the target percentage.
+#Balancing the target percentage.Data augmentation for the minority class.
 smote = SMOTE(sampling_strategy = 'minority')
-x,balanced_y = smote.fit_sample(x,y)
-sc = MinMaxScaler()
-balanced_x = sc.fit_transform(x)
+balanced_x,balanced_y = smote.fit_sample(x,y)
+print("======= Balanced Dataset ========")
+print(pd.DataFrame(balanced_x,columns=[x.columns]))
+
 
 print("X shape after SMOTE generation.")
 print(balanced_x.shape)
@@ -110,12 +111,97 @@ print(imbalance_test(balanced_x_train,balanced_x_test,balanced_y_train,balanced_
 print("Positive prediction score after SMOTE:")
 print(imbalance_test(balanced_x_train,balanced_x_test,balanced_y_train,balanced_y_test,1))
 
-#Using logistic regression to see how much difference there is between cross validations in terms of model score to detect if dataset is noisy.
-lr = LogisticRegression(max_iter=4000,random_state=SEED)
-scores = cross_val_score(lr,balanced_x_train,balanced_y_train,cv = 10)
-acc_df = pd.DataFrame(data = {"log_model_num": range(10),"accuracy": scores})
-acc_df.plot(x="log_model_num",y="accuracy",marker="o",linestyle="--")
-plt.show()
 
-plot_confusion_matrix(lr,balanced_x_test,balanced_y_test,display_labels = ["Subscribed","Not Sub."])
-plt.show()
+lgbm = lightgbm.LGBMClassifier(learning_rate = 0.1,
+                               min_child_samples = 20,
+                               min_split_gain=1,
+                               min_child_weight = 0.1,
+                               reg_alpha = 0.01,
+                               reg_lambda = 0.01,
+                               objective = "binary",
+                               importance_type = "gain",
+                               random_state = SEED)
+lgbm.fit(balanced_x_train,balanced_y_train)
+
+scores = cross_val_score(lgbm,balanced_x_test,balanced_y_test,cv = 10) 
+acc_df = pd.DataFrame(data = {"grad_boosted_trees": range(10),"accuracy": scores})
+acc_df.plot(x="grad_boosted_trees",y="accuracy",marker="o",linestyle="--")
+print("Mean of 10 scores is "+str(np.mean(scores)))
+
+plot_confusion_matrix(lgbm,balanced_x_test,balanced_y_test,display_labels = ["Subscribed","Not Sub."])
+
+#ROC curve visualization shows the classifier's ability to classify positive and negative labels at each threshold.
+#AUC is better metric than accuracy score and error rate when it comes to the Classifiers.
+#The bigger the area under the curve the better the at classifying both positive and negative labels.
+#It also depends on our research topic,if classifying positive labels are more important than the negative ones
+#it enables us to see which threshold to use to achieve that purpose.
+plot_roc_curve(lgbm,balanced_x_test,balanced_y_test)
+
+#Using SVM for classifying.
+#Picking dataset as balanced for SVM classifier.
+
+#Calculation of kernel makes SVM take lots of time to make to grid search over while fitting the dataset.
+#Because kernel looks for appropriate dimension where it can separate labels.
+#Due to that reason,instead of generating data to make it balanced,it rathered to skim the data to make them equal numbers.
+#And still we have about more than 10,500 instances to fit the model into.
+svm_df = pd.concat([pre_df[pre_df.y == 1],pre_df[pre_df.y == 0][:num_pos_label]],axis = 0)
+
+#Also i shuffled the data randomly.
+svm_df = shuffle(svm_df,random_state = 42).reset_index()
+svm_df.drop("index",axis = 1,inplace = True)
+print("SVM Dataset")
+print(svm_df)
+
+svm_dummy_df = pd.get_dummies(svm_df[categorical_features],prefix_sep = '_',drop_first = True,columns = categorical_features)
+print(svm_dummy_df)
+
+svm_model_df = pd.concat([svm_df[numeric_features],svm_dummy_df,svm_df.y],axis=1)
+print(svm_model_df)
+
+svm_x = svm_model_df.iloc[:,:-1]
+svm_y = svm_model_df.y
+print("==== Target ====")
+print(svm_y)
+print("==== Features ====")
+print(svm_x)
+
+x_train,x_test,y_train,y_test = train_test_split(svm_x,svm_y,test_size = 0.25,random_state = SEED)
+x_train_scaled = scale(x_train)
+x_test_scaled = scale(x_test)
+
+clf_dummy = DummyClassifier(strategy="most_frequent",random_state = SEED)
+clf_dummy.fit(x_train,y_train)
+print("Dummy classifier Score is: " + str(clf_dummy.score(x_test,y_test)))
+
+#Grid search over model to find best hyperparameters to fit the model to the data.
+print("Grid search over the SVM...")
+svm = SVC(random_state = SEED)
+param_grid = [{"C":[0.5,1,10,100],
+               "gamma":["scale",1,0.1,0.01,0.001,0.0001],
+               "kernel":["rbf"],},]
+optimal_params = GridSearchCV(SVC(),
+                              param_grid,
+                              cv=3,
+                              scoring="accuracy")
+optimal_params.fit(x_train_scaled,y_train)
+
+print("Best hyperparameters: " + str(optimal_params.best_params_))
+
+
+#Using best hyperparameters to fit the model.
+clf_svm = SVC(C = 100,gamma = 0.0001,kernel = "rbf",random_state = 42)
+clf_svm.fit(x_train_scaled,y_train)
+plot_confusion_matrix(clf_svm,
+                      x_test_scaled,
+                      y_test,
+                      values_format = "d",
+                      display_labels = ["Did not Subscribed","Subscribed"])
+
+scores = cross_val_score(clf_svm,x_test_scaled,y_test,cv = 10) 
+acc_df = pd.DataFrame(data = {"Machine": range(10),"accuracy": scores})
+acc_df.plot(x="Machine",y="accuracy",marker="o",linestyle="--")
+print("Mean of 10 scores is "+str(np.mean(scores)))
+
+plot_roc_curve(clf_svm,x_test_scaled,y_test)
+
+
