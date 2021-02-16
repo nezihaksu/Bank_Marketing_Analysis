@@ -185,11 +185,13 @@ optimal_params = GridSearchCV(SVC(),
                               scoring="accuracy")
 optimal_params.fit(x_train_scaled,y_train)
 
-print("Best hyperparameters: " + str(optimal_params.best_params_))
+best_params = optimal_params.best_params_
+
+print("Best hyperparameters: " + str(best_params))
 
 
 #Using best hyperparameters to fit the model.
-clf_svm = SVC(C = 100,gamma = 0.0001,kernel = "rbf",random_state = 42)
+clf_svm = SVC(C = best_params["C"],gamma = best_params["gamma"],kernel = best_params["kernel"],random_state = 42)
 clf_svm.fit(x_train_scaled,y_train)
 plot_confusion_matrix(clf_svm,
                       x_test_scaled,
