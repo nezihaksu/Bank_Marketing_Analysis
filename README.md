@@ -16,6 +16,15 @@ The bank has been targeting the people who are between the ages 30-60 yet the nu
 
 I wrote a function that takes arguments to group by the dataframe by a numerical feature and the kind of it (sum or mean).
 
+```python
+def groupby_method(groupby_features,method):
+        series_groupby = df[groupby_features].groupby(df[groupby_features].iloc[:,-1].name)
+        if method == 'sum':
+            return series_groupby.sum()
+        elif method == 'mean':
+            return series_groupby.mean()
+```
+
 Firstly,to see the graphs where categorical features is grouped by Balance.Categorical features shows the mean balance of people in those respective categories.
 
 It shows how much balance does most of the people in each category have.
@@ -52,6 +61,21 @@ More time on the phone spent on people who did not accept to subscribe than the 
 ![](/graph_images/sum_of_duration2.JPG)
 
 #### Note: Duration can't be added to a model if we want it to be as realistic as possible,because when there is no call,duration and term deposit variables are 0.And this means we automatically assume person who has not been contacted would not subscribe the term deposit,which is a unsupported claim.
+
+### Categorical Feature Distribution
+
+This function i wrote enables me to see the distribution of categories in each categorical features,thus helps me to see prevelant categories and relate them with the context.
+
+```python
+#Creating a category dict where each category name is key and their count are the value.
+def category_distribution(df,categorical_features):
+  feature_dict = {}
+  for category in categorical_features:
+    category_dict = {}
+    for unique_data in df[category].unique():
+      category_dict[unique_data] = len(df[df[category] == unique_data])
+      feature_dict[category] = category_dict
+```
 
 
 
