@@ -77,9 +77,9 @@ def category_distribution(df,categorical_features):
       feature_dict[category] = category_dict
 ```
 
-![](/graph_images/categorical_feature_distribution1.JPG.JPG)
-![](/graph_images/categorical_feature_distribution2.JPG.JPG)
-![](/graph_images/categorical_feature_distribution3.JPG.JPG)
+![](/graph_images/categorical_feature_distribution1.JPG)
+![](/graph_images/categorical_feature_distribution2.JPG)
+![](/graph_images/categorical_feature_distribution3.JPG)
 
 ## Model
 
