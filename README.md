@@ -77,9 +77,9 @@ def category_distribution(df,categorical_features):
       feature_dict[category] = category_dict
 ```
 
-![](/graph_images/categorical_feature_distribtion1.JPG)
-![](/graph_images/categorical_feature_distribtion2.JPG)
-![](/graph_images/categorical_feature_distribtion3.JPG)
+![](/graph_images/categorical_feature_distribution1.JPG.JPG)
+![](/graph_images/categorical_feature_distribution2.JPG.JPG)
+![](/graph_images/categorical_feature_distribution3.JPG.JPG)
 
 ## Model
 
@@ -98,7 +98,7 @@ def imbalance_test(x_train,x_test,y_train,y_test,generated_prediction):
   clf_dummy.fit(x_train,y_train)
   return clf_dummy.score(x_test,y_test)
 ```
-I choose constant strategy to see each class' accuracy power and found these results:
+I chose constant strategy to see each class' accuracy power and found these results:
 
 	Negative prediction score:
 	0.8802972662125099
@@ -146,7 +146,7 @@ Downsampling causes loss of information.However it is best tecnique deployed aga
 
 To use downsampling for my advantage i wanted to use downsampled data with Support Vector Machine,since it takes lots of time to train it with big dataset because of kernel calculations.
 
-Support Vector Machine finds the hyperplane that separates two classes in a dimension when it searches it for it in infinite dimensions.
+Support Vector Machine finds the hyperplane that separates two classes in infinite dimensions with Kernel Trick.
 
 SVM is really great separating overlapping data,a data that requires non-linear separation and high dimensional data. 
 
