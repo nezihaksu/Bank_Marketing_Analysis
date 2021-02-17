@@ -77,7 +77,91 @@ def category_distribution(df,categorical_features):
       feature_dict[category] = category_dict
 ```
 
+![](/graph_images/categorical_feature_distribtion1.JPG)
+![](/graph_images/categorical_feature_distribtion2.JPG)
+![](/graph_images/categorical_feature_distribtion3.JPG)
 
+## Model
+
+### Dummy Classifier
+
+First i looked at the features if any of them any modification.
+
+Converted categorical features into numerical representation with pandas' get_dummies method.
+
+After that i checked if converting age into categorical variable by assigning certain range of ages as "young","mature","old",which improved nothing.
+
+For a comparison with the models i needed a null accuracy of sorts,because of this need i decided to use sklearn's DummyClasifier.
+```python
+def imbalance_test(x_train,x_test,y_train,y_test,generated_prediction):
+  clf_dummy = DummyClassifier(strategy="constant",random_state = SEED,constant=generated_prediction)
+  clf_dummy.fit(x_train,y_train)
+  return clf_dummy.score(x_test,y_test)
+```
+I choose constant strategy to see each class' accuracy power and found these results:
+
+	Negative prediction score:
+	0.8802972662125099
+	Positive prediction score
+	0.11970273378749005
+
+### Gradient Boost and Upsampling
+
+Due to dataset being extremely imbalanced,i decided to fit Gradient Boosting model with SMOTE.
+
+Boosting process helps each class to be represented in the model better rather than bagging and maximum likelihood,even though boosting model has previous prediction in its calculations,it tests each of its tree to yield lowest residuals in every iteration,thus reducing the minority class' residual.
+
+SMOTE generates instances to make classes equal.It is a very reliable libriary.It generates instances in certain ranges that they appear in the dataset.
+
+Null accuracy of each class after SMOTE:
+
+	Negative prediction score:
+	0.49842192274936126
+	Positive prediction score
+	0.5015780772506387
+
+Gradient Boost model after a grid search over its hyperparameters with cross validation:
+
+```pyhon
+lgbm = lightgbm.LGBMClassifier(learning_rate = 0.1,
+                               min_child_samples = 20,
+                               min_split_gain=1,
+                               min_child_weight = 0.1,
+                               reg_alpha = 0.01,
+                               reg_lambda = 0.01,
+                               objective = "binary",
+                               importance_type = "gain",
+                               random_state = SEED)
+```
+
+### Note: When it comes to performance metric of a classifier,ROC Curve is better than accuracy score and error rate calculated from Confusion Matrix.Since it shows model's ability to detect true positives and false positives at every possible threshold between the classes.This also helps to adjust the model's threshold for our needs when it is more important to detect a class than the other class.For more information please check [this paper](https://www.researchgate.net/publication/2364670_The_Effect_of_Class_Distribution_on_Classifier_Learning_An_Empirical_Study).
+
+![](/graph_images/lgbm_upscaled_data_roc_curve.JPG)
+
+### Support Vector Machine and Downsampling
+
+After this step i wanted to approach the imbalance problem in a reverse way by downsampling instead of upsampling.
+
+Downsampling causes loss of information.However it is best tecnique deployed against imbalance problem in terms of time spent on dataset.
+
+To use downsampling for my advantage i wanted to use downsampled data with Support Vector Machine,since it takes lots of time to train it with big dataset because of kernel calculations.
+
+Support Vector Machine finds the hyperplane that separates two classes in a dimension when it searches it for it in infinite dimensions.
+
+SVM is really great separating overlapping data,a data that requires non-linear separation and high dimensional data. 
+
+After a grid search for hyperparameters:
+
+```python
+clf_svm = SVC(C = best_params["C"],gamma = best_params["gamma"],kernel = best_params["kernel"],random_state = SEED)
+clf_svm.fit(x_train_scaled,y_train)
+```
+
+Roc curve of SVM classsifier:
+
+![](/graph_images/svm_downscaled_data_roc_curve.JPG)
+
+Support vector classifies positives and negatives nearly perfectly.Greater the AUC better the classifying.
 
 
 
