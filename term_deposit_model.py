@@ -206,4 +206,56 @@ print("Mean of 10 scores is "+str(np.mean(scores)))
 
 plot_roc_curve(clf_svm,x_test_scaled,y_test)
 
+#To see the most important features from the tree,used XGBoost classifier.
+print("Hyperparameter search for XGBoost classifier...")
+params_grid = {
+    "max_depth":[3,4,5],
+    "learn_rate":[0.1,0.01,0.05],
+    "gamma":[0,0.25,1.0],
+    "reg_lambda":[0,1.0,10.0]  
+}
 
+optimal_params = GridSearchCV(estimator=xgb.XGBClassifier(objective="binary:logistic",seed=42),
+                              param_grid=params_grid,
+                              scoring="roc_auc",
+                              cv=3
+                              )
+optimal_params.fit(x_train,y_train,
+                   early_stopping_rounds=10,
+                   eval_metric="auc",
+                   eval_set=[(x_test,y_test)],
+                   verbose=True)
+
+best_params = optimal_params.best_params_ 
+
+clf_xgb = xgb.XGBClassifier(seed=42,
+                            objective="binary:logistic",
+                            gamma=best_params["gamma"],
+                            learn_rate=best_params["learn_rate"],
+                            max_depth=best_params["max_depth"],
+                            reg_lambda=best_params["reg_lambda"]
+                            )
+clf_xgb.fit(x_train,y_train,
+            verbose=True,
+            early_stopping_rounds=10,
+            eval_metric="aucpr",
+            eval_set=[(x_test,y_test)])
+
+
+plot_roc_curve(clf_xgb,x_test,y_test)
+plt.show()
+
+bst = clf_xgb.get_booster()
+for importance_type in ("weight","gain","cover","total_gain","total_cover"):
+  print("{} ".format(importance_type),bst.get_score(importance_type=importance_type))
+
+node_params = {"shape":"box",
+               "style":"filled,rounded",
+               "fillcolor":"#78cbe"}
+leaf_params = {"shape":"box",
+               "style":"filled",
+               "fillcolor":"#e48038"}
+xgb.to_graphviz(clf_xgb,num_trees=0,size="20,15",
+                condition_node_params=node_params,
+                leaf_node_params=leaf_params)
+plt.show()
