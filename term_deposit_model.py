@@ -138,6 +138,20 @@ plot_confusion_matrix(lgbm,balanced_x_test,balanced_y_test,display_labels = ["Su
 #it enables us to see which threshold to use to achieve that purpose.
 plot_roc_curve(lgbm,balanced_x_test,balanced_y_test)
 
+#What is the decision process of Gradient Boost?
+#Housing,contact type and the months are the first most important features deciding classes.
+feature_importances = zip(lgbm.feature_importances_,x.columns)
+sorted_importances = sorted(feature_importances,reverse=True)
+feature_names = []
+importance_values = []
+for k,v in sorted_importances:
+  feature_names.append(v)
+  importance_values.append(k)
+plt.bar(feature_names[:5],importance_values[:5])
+plt.show()
+
+
+
 #Using SVM for classifying.
 #Picking dataset as balanced for SVM classifier.
 
