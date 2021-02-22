@@ -164,7 +164,58 @@ Roc curve of SVM classsifier:
 Support vector classifies positives and negatives nearly perfectly.Greater the AUC better the classifying.
 
 
+### Extreme Gradient Boost and Downsampling
 
+To catch the accuracy of Support Vector Machine and explainability of Gradient Boost Trees using XGBoost is a good choice.
 
+XGBoost have lots of optimization factors and designed to solve any kind of machine learning problem.
 
+It also depends on the prior probability and because of that sensitive to imbalances.
 
+Robust to outlier in the dataset.
+
+```python
+clf_xgb = xgb.XGBClassifier(seed=42,
+                            objective="binary:logistic",
+                            gamma=best_params["gamma"],
+                            learn_rate=best_params["learn_rate"],
+                            max_depth=best_params["max_depth"],
+                            reg_lambda=best_params["reg_lambda"]
+                            )
+```
+
+ROC Curve to see how well does it classifies both positive and negative samples:
+
+![](/graph_images/xgboost_downsampled_roc.JPG)
+
+It has the same performance as the SVM.
+
+## In conclusion:
+
+When dealing with a imbalance dataset,the dataset definitely needs to be modified either by upsampled or downsampled otherwise the model would be inclined to detect more of the majority class.
+
+Using downsampled version of the data with more powerful models yielded better outcomes and ables us to train faster.
+
+Gradient Boost and XGBoost have advantage of explainability over SVM model.
+
+Gradient Boost feature importance shows that having housing debt,the month and the day of the contacts are the most important factor when it comes to the subscription.
+
+![](/graph_images/lgbm_feature_importance.JPG)
+
+XGBoost also rooted its tree with the features that have the highest similiarity scores.
+
+According to it,it is also the case that most important factors are unknown contacts and time related features.Especially the month may.
+
+![](/graph_images/xgboost_tree.JPG)
+
+These results can be attributed to the planning of the bank,when they call people mostly in the month may.Also contacting with people that they don't know what the contact device is.
+
+It shows that these models are focused on the repetation of categorical features.
+
+The more the category repeats in the dataset the more it has the chance of effecting the models classification power.
+
+Bank is contacting people in month may since it is the time when they decide to buy a new home,therefore housing debt is also a big factor.
+
+By calling people (in the month may) who has housing debt or at a time of their lives where they need to buy a house bank can have a more detailed and balanced dataset,since it would yield more positive outcomes.
+
+And it would also result in less contact,less phone bill,less salary paid to workers.
