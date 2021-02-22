@@ -200,6 +200,16 @@ Gradient Boost and XGBoost have advantage of explainability over SVM model.
 
 Gradient Boost feature importance shows that having housing debt,the month and the day of the contacts are the most important factor when it comes to the subscription.
 
+```python
+feature_importances = zip(lgbm.feature_importances_,x.columns)
+sorted_importances = sorted(feature_importances,reverse=True)
+feature_names = []
+importance_values = []
+for k,v in sorted_importances:
+  feature_names.append(v)
+  importance_values.append(k)
+plt.bar(feature_names[:4],importance_values[:4])
+```
 ![](/graph_images/lgbm_feature_importance.JPG)
 
 XGBoost also rooted its tree with the features that have the highest similiarity scores.
