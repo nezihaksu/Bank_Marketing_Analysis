@@ -8,7 +8,7 @@ The classification goal is to predict if the client will subscribe (yes/no) a te
 
 ### Balance
 
-Balance accumucalation is between the ages 30 and 60's.Term deposit subscription is also highly correlated with age and balance.
+Balance accumucalation is between the ages 30 and 60's.
 
 The bank has been targeting the people who are between the ages 30-60 yet the number of negative instances in dataset are overwhelmingly high compared to positives.
 
@@ -27,7 +27,7 @@ def groupby_method(groupby_features,method):
 
 Firstly,to see the graphs where categorical features is grouped by Balance.Categorical features shows the mean balance of people in those respective categories.
 
-It shows how much balance does most of the people in each category have.
+It shows how much mean balance does most of the people in each category have.
 
 According to subscription and balance graph,people who did not subscribed has more balance than who did.
 
@@ -89,7 +89,7 @@ First i looked at the features if any of them any modification.
 
 Converted categorical features into numerical representation with pandas' get_dummies method.
 
-After that i checked if converting age into categorical variable by assigning certain range of ages as "young","mature","old",which improved nothing.
+After that i checked if converting age into categorical variable by assigning certain range of ages as "young","mature","old" could improve performance of classification among models,which improved nothing.
 
 For a comparison with the models i needed a null accuracy of sorts,because of this need i decided to use sklearn's DummyClasifier.
 ```python
@@ -170,9 +170,9 @@ To catch the accuracy of Support Vector Machine and explainability of Gradient B
 
 XGBoost have lots of optimization factors and designed to solve any kind of machine learning problem.
 
-It also depends on the prior probability and because of that sensitive to imbalances.
+It also uses prior probability in in Similiarity calculations.
 
-Robust to outlier in the dataset.
+It has a regularization term that makes predictions less sensitive to each observation in the dataset,thus robust to outliers in the dataset.
 
 ```python
 clf_xgb = xgb.XGBClassifier(seed=42,
@@ -192,7 +192,7 @@ It has the same performance as the SVM.
 
 ## In conclusion:
 
-When dealing with a imbalance dataset,the dataset definitely needs to be modified either by upsampled or downsampled otherwise the model would be inclined to detect more of the majority class.
+When dealing with an imbalanced dataset,the dataset definitely needs to be modified either by upsampled or downsampled otherwise the model would be inclined to detect more of the majority class.
 
 Using downsampled version of the data with more powerful models yielded better outcomes and ables us to train faster.
 
@@ -229,3 +229,4 @@ Bank is contacting people in month may since it is the time when they decide to 
 By calling people (in the month may) who has housing debt or at a time of their lives where they need to buy a house bank can have a more detailed and balanced dataset,since it would yield more positive outcomes.
 
 And it would also result in less contact,less phone bill,less salary paid to workers.
+
